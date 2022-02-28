@@ -6,13 +6,10 @@
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "scrape": "node index.js"
+    "scrape": "node --experimental-fetch index.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "dependencies": {
-    "puppeteer": "^13.4.0",
-    "puppeteer-core": "^13.4.0"
-  }
+  "dependencies": {}
 }
