@@ -1,4 +1,7 @@
 import { JSDOM } from "jsdom";
+import puppeteer from "puppeteer";
+
+const browser = await puppeteer.launch();
 
 // const consoles = ["GB", "GBC", "GBA", "DS", "PSP", "NES", "Genesis", "SNES", "Saturn", "PS1", "N64", "Dreamcast", "PS2", "Xbox", "GameCube", "PS3", "Wii", "WiiWare"];
 // const categories = ["number", "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"];
@@ -7,17 +10,22 @@ import { JSDOM } from "jsdom";
 const consoles = ["GB", "GBC", "GBA"];
 const categories = ["number", "A", "B", "C"];
 
-// https://download2.vimm.net/download/?mediaId=38840&alt=0
+const fetchAndDownload = async (vaultLink, gameConsole, category) => {
+  const page = await browser.newPage();
+  await page.goto(`https://vimm.net${vaultLink}`);
 
-const fetchAndDownload = async (vaultLink) => {
-  const res = await fetch(`https://vimm.net${vaultLink}`);
-  const html = await res.text();
-  const dom = new JSDOM(html);
+  await page.waitForSelector('#download_form');
 
-  const form = dom.window.document.querySelector('#download_form');
+  await page._client.send('Page.setDownloadBehavior', {
+    behavior: 'allow',
+    downloadPath: `./data/${gameConsole}/${category}`
+  });
 
-  // form.querySelector('button').click();
-  console.log(form);
+  // TODO: If I can click "Go Back", retry recursively
+
+  await page.click('#download_form button');
+
+  // await page.close();
 }
 
 const scrapeCategoryPage = async (gameConsole, category) => {
@@ -28,7 +36,7 @@ const scrapeCategoryPage = async (gameConsole, category) => {
   for (const table of dom.window.document.querySelectorAll('.hovertable')) {
     for (const game of table.querySelectorAll("td:first-of-type a:first-of-type")) {
       console.log(`Downloading: ${game.innerHTML}`);
-      await fetchAndDownload(game.href);
+      await fetchAndDownload(game.href, gameConsole, category);
     }
   }
 };
