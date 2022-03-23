@@ -1,7 +1,7 @@
 import { JSDOM } from "jsdom";
 import puppeteer from "puppeteer";
 
-const browser = await puppeteer.launch();
+const browser = await puppeteer.launch({ headless: false });
 
 // const consoles = ["GB", "GBC", "GBA", "DS", "PSP", "NES", "Genesis", "SNES", "Saturn", "PS1", "N64", "Dreamcast", "PS2", "Xbox", "GameCube", "PS3", "Wii", "WiiWare"];
 // const categories = ["number", "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"];
@@ -12,16 +12,16 @@ const categories = ["number", "A", "B", "C"];
 
 const fetchAndDownload = async (vaultLink, gameConsole, category) => {
   const page = await browser.newPage();
-  await page.goto(`https://vimm.net${vaultLink}`);
+  await page.goto(`https://vimm.net${vaultLink}`, { timeout: 0 });
 
-  await page.waitForSelector('#download_form');
+  const form = await page.waitForSelector('#download_form');
 
   await page._client.send('Page.setDownloadBehavior', {
     behavior: 'allow',
     downloadPath: `./data/${gameConsole}/${category}`
   });
 
-  // TODO: If I can click "Go Back", retry recursively
+  // TODO: Set the form method to get and clear the on submit
 
   await page.click('#download_form button');
 
